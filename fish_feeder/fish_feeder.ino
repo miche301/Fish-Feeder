@@ -1,0 +1,214 @@
+#include <WiFi.h>
+#include <WebServer.h>
+#include <ESPmDNS.h>
+#include <Preferences.h>
+#include <time.h>
+
+
+const char* WIFI_SSID = "wifi";  // must be a 2.4 GHz network
+const char* WIFI_PASSWORD = "password";
+const unsigned long FEED_INTERVAL_HOURS = 24;  // LED starts blinking after this long
+// ----------------------------------
+
+const int BUTTON_PIN = 4;
+const int LED_PIN = 2;
+const char* TIMEZONE = "PST8PDT,M3.2.0,M11.1.0";  // Pacific time with daylight saving
+const char* HOSTNAME = "fishfeeder";              // page at http://fishfeeder.local
+
+WebServer server(80);
+Preferences prefs;
+
+time_t lastFed = 0;  // 0 means "never fed yet"
+
+// Button debounce state
+int lastReading = HIGH;
+int stableState = HIGH;
+unsigned long lastChangeMs = 0;
+const unsigned long DEBOUNCE_MS = 50;
+
+// LED blink state
+unsigned long lastBlinkMs = 0;
+bool ledOn = false;
+
+// ---------- Helpers ----------
+
+bool timeIsSynced() {
+  // Before the internet time sync finishes, the clock reads 1970
+  return time(nullptr) > 1700000000;
+}
+
+bool needsFeeding() {
+  if (lastFed == 0) return true;
+  if (!timeIsSynced()) return false;
+  return (time(nullptr) - lastFed) >= (time_t)(FEED_INTERVAL_HOURS * 3600UL);
+  //return (time(nullptr) - lastFed) >= 60;  // TEST: 1 minute
+}
+
+String formatTime(time_t t) {
+  struct tm info;
+  localtime_r(&t, &info);
+  char buf[40];
+  strftime(buf, sizeof(buf), "%a %b %d, %I:%M %p", &info);
+  return String(buf);
+}
+
+String formatAgo(long seconds) {
+  if (seconds < 60) return "just now";
+  long minutes = seconds / 60;
+  long hours = minutes / 60;
+  long days = hours / 24;
+  minutes %= 60;
+  hours %= 24;
+
+  String s = "";
+  if (days > 0) s += String(days) + " d ";
+  if (hours > 0) s += String(hours) + " h ";
+  if (days == 0) s += String(minutes) + " min ";
+  return s + "ago";
+}
+
+void recordFeeding() {
+  if (!timeIsSynced()) {
+    Serial.println("Clock isn't synced yet. Check Wi-Fi and try again in a few seconds.");
+    return;
+  }
+  lastFed = time(nullptr);
+  prefs.putLong64("lastFed", (int64_t)lastFed);
+  Serial.println("Fed at " + formatTime(lastFed));
+
+  // Quick confirmation flash
+  digitalWrite(LED_PIN, HIGH);
+  delay(400);
+  digitalWrite(LED_PIN, LOW);
+  ledOn = false;
+}
+
+// ---------- Web page ----------
+
+void handleRoot() {
+  String status;
+  String detail;
+  String color;
+
+  if (lastFed == 0) {
+    status = "Not fed yet";
+    detail = "Press the button when you feed them.";
+    color = "#d9822b";
+  } else if (!timeIsSynced()) {
+    status = "Syncing clock...";
+    detail = "Refresh in a few seconds.";
+    color = "#888888";
+  } else {
+    long ago = (long)(time(nullptr) - lastFed);
+    status = needsFeeding() ? "Time to feed!" : "Fish are fed";
+    detail = "Last fed " + formatAgo(ago) + "<br><small>" + formatTime(lastFed) + "</small>";
+    color = needsFeeding() ? "#d9822b" : "#2e9e6b";
+  }
+
+  String html =
+    "<!doctype html><html><head>"
+    "<meta charset='utf-8'>"
+    "<meta name='viewport' content='width=device-width, initial-scale=1'>"
+    "<meta http-equiv='refresh' content='30'>"
+    "<title>Fish Feeder</title>"
+    "<style>"
+    "body{font-family:-apple-system,system-ui,sans-serif;margin:0;padding:24px;"
+    "background:#f4f7f6;color:#1d2b28;text-align:center}"
+    ".card{max-width:360px;margin:40px auto;background:#fff;border-radius:16px;"
+    "padding:28px;box-shadow:0 2px 12px rgba(0,0,0,.08)}"
+    ".status{font-size:28px;font-weight:700;color:"
+    + color + ";margin:8px 0 12px}"
+              ".detail{font-size:18px;line-height:1.5;margin-bottom:24px}"
+              "small{color:#6b7a77}"
+              "button{font-size:18px;padding:14px 24px;border:none;border-radius:12px;"
+              "background:#2e9e6b;color:#fff;width:100%}"
+              "</style></head><body>"
+              "<div class='card'>"
+              "<div style='font-size:40px'>&#128031;</div>"
+              "<div class='status'>"
+    + status + "</div>"
+               "<div class='detail'>"
+    + detail + "</div>"
+               "<form method='POST' action='/fed'><button type='submit'>I just fed them</button></form>"
+               "</div></body></html>";
+
+  server.send(200, "text/html", html);
+}
+
+void handleFed() {
+  recordFeeding();
+  server.sendHeader("Location", "/");
+  server.send(303);  // send the browser back to the main page
+}
+
+// ---------- Setup & loop ----------
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(BUTTON_PIN, INPUT_PULLUP);  // pressed = LOW
+  pinMode(LED_PIN, OUTPUT);
+  digitalWrite(LED_PIN, LOW);
+
+  // Load the saved feeding time
+  prefs.begin("fishfeeder", false);
+  lastFed = (time_t)prefs.getLong64("lastFed", 0);
+
+  // Connect to Wi-Fi
+  Serial.print("Connecting to Wi-Fi");
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  unsigned long start = millis();
+  while (WiFi.status() != WL_CONNECTED && millis() - start < 20000) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println();
+
+  if (WiFi.status() == WL_CONNECTED) {
+    Serial.print("Connected! Open http://");
+    Serial.println(WiFi.localIP());
+  } else {
+    Serial.println("Couldn't connect. Double-check the Wi-Fi name/password (2.4 GHz only).");
+  }
+
+  // Get the real time from the internet
+  configTzTime(TIMEZONE, "pool.ntp.org", "time.nist.gov");
+
+  // Lets you use http://fishfeeder.local on most phones and computers
+  if (MDNS.begin(HOSTNAME)) {
+    Serial.println("Or try http://fishfeeder.local");
+  }
+
+  server.on("/", HTTP_GET, handleRoot);
+  server.on("/fed", HTTP_POST, handleFed);
+  server.begin();
+}
+
+void loop() {
+  server.handleClient();
+
+  // Debounced button read
+  int reading = digitalRead(BUTTON_PIN);
+  if (reading != lastReading) {
+    lastChangeMs = millis();
+    lastReading = reading;
+  }
+  if (millis() - lastChangeMs > DEBOUNCE_MS && reading != stableState) {
+    stableState = reading;
+    if (stableState == LOW) {
+      recordFeeding();
+    }
+  }
+
+  // Blink the LED when it's feeding time
+  if (needsFeeding()) {
+    if (millis() - lastBlinkMs > 500) {
+      lastBlinkMs = millis();
+      ledOn = !ledOn;
+      digitalWrite(LED_PIN, ledOn ? HIGH : LOW);
+    }
+  } else if (ledOn) {
+    ledOn = false;
+    digitalWrite(LED_PIN, LOW);
+  }
+}
