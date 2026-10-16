@@ -2,6 +2,12 @@
 
 A small ESP32 project that tracks when my fish were last fed. Press a physical button (or tap a button on a web page) after feeding. The ESP32 records the time, serves a status page you can open from any phone on the same Wi-Fi, and blinks an LED when it's been more than 24 hours.
 
+<img width="320" height="569" alt="demo" src="https://github.com/user-attachments/assets/d2ebabd5-00f4-4e15-bbd9-df87c1b8aef9" />
+<img width="320" height="569" alt="fishfeederpic" src="https://github.com/user-attachments/assets/c5bc3888-305f-4feb-8887-6d128864551a" />
+<img width="1920" height="1036" alt="2image" src="https://github.com/user-attachments/assets/ebc0cc44-473f-481e-a1f5-5d15504b4767" />
+<img width="1917" height="1041" alt="image" src="https://github.com/user-attachments/assets/cbcfbe9f-85b9-47ab-ab05-fec81da8b1e2" />
+This image shows "last fed 1 min ago" for testing.
+
 ## Features
 
 - **Physical button** to log a feeding, with software debouncing
