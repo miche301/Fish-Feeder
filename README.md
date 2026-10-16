@@ -13,6 +13,7 @@ The project has two versions:
 <img width="320" height="569" alt="IMG_7267" src="https://github.com/user-attachments/assets/6a2575d4-b078-4fac-88f7-2cffe54cbd1a" />
 <img width="1918" height="1033" alt="image2" src="https://github.com/user-attachments/assets/14ff83a3-be08-4803-ac2f-2ddac69700f2" />
 <img width="1917" height="1037" alt="4" src="https://github.com/user-attachments/assets/d66204a5-6c56-4b4a-ba87-bcd84340b727" />
+Images shows are at 1 minute for testing.
 
 ## v2 Features
 
@@ -97,6 +98,7 @@ All settings are at the top of the sketch:
 <img width="1920" height="1036" alt="2image" src="https://github.com/user-attachments/assets/ebc0cc44-473f-481e-a1f5-5d15504b4767" />
 <img width="1917" height="1041" alt="image" src="https://github.com/user-attachments/assets/cbcfbe9f-85b9-47ab-ab05-fec81da8b1e2" />
 This image shows "last fed 1 min ago" for testing.
+
 
 *In v1, the blue LED blinks when feeding is due. One button press logs the feeding and turns it off.*
 
