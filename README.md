@@ -6,7 +6,7 @@ A small ESP32 project that tracks when my fish were last fed. Press a physical b
 <img width="2160" height="2880" alt="fishfeederpic" src="https://github.com/user-attachments/assets/c5bc3888-305f-4feb-8887-6d128864551a" />
 <img width="1920" height="1036" alt="2image" src="https://github.com/user-attachments/assets/ebc0cc44-473f-481e-a1f5-5d15504b4767" />
 <img width="1917" height="1041" alt="image" src="https://github.com/user-attachments/assets/cbcfbe9f-85b9-47ab-ab05-fec81da8b1e2" />
-
+This image shows "last fed 1 min ago" for testing.
 
 ## Features
 
