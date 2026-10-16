@@ -10,7 +10,7 @@ The project has two versions:
 | **v1** | Button, blinking reminder LED, web status page | [`fish_feeder/`](fish_feeder/) |
 
 <img width="320" height="569" alt="demo_v2" src="https://github.com/user-attachments/assets/120e9b37-c6a2-41cb-a826-5ab93a079c53" />
-<img width="216" height="288" alt="IMG_7267" src="https://github.com/user-attachments/assets/6a2575d4-b078-4fac-88f7-2cffe54cbd1a" />
+<img width="320" height="569" alt="IMG_7267" src="https://github.com/user-attachments/assets/6a2575d4-b078-4fac-88f7-2cffe54cbd1a" />
 <img width="1918" height="1033" alt="image2" src="https://github.com/user-attachments/assets/14ff83a3-be08-4803-ac2f-2ddac69700f2" />
 <img width="1917" height="1037" alt="4" src="https://github.com/user-attachments/assets/d66204a5-6c56-4b4a-ba87-bcd84340b727" />
 
