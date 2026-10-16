@@ -35,8 +35,6 @@ This image shows "last fed 1 min ago" for testing.
 
 The button straddles the center gap of the breadboard. Using diagonal legs guarantees the two pins are on opposite sides of the switch. No external resistor is needed because the code enables the ESP32's internal pull-up, so the pin reads `HIGH` normally and `LOW` when pressed.
 
-<!-- Optional: add a wiring diagram or a link to the Wokwi simulation here -->
-
 ## Setup
 
 1. Install the [Arduino IDE](https://www.arduino.cc/en/software) and add ESP32 support (Boards Manager → search **esp32** by Espressif).
@@ -46,8 +44,6 @@ The button straddles the center gap of the breadboard. Using diagonal legs guara
 5. Click **Upload**. If it hangs on `Connecting.....`, hold the **BOOT** button until the upload starts.
 6. Open the Serial Monitor at **115200 baud** to see the board's IP address.
 7. Open that address (or `http://fishfeeder.local`) on a phone connected to the same Wi-Fi.
-
-> ⚠️ Don't commit your real Wi-Fi password. Replace it with placeholder text before pushing to GitHub.
 
 ## How It Works
 
@@ -71,8 +67,6 @@ At the top of the sketch:
 
 - Prototyped in the [Wokwi](https://wokwi.com) ESP32 simulator using its virtual `Wokwi-GUEST` network to check the button wiring, LED behavior, Wi-Fi connection, and NTP sync.
 - To test the reminder quickly, temporarily change `3600UL` to `1UL` in `needsFeeding()` so the interval counts in seconds instead of hours.
-
-<!-- Add notes on hardware testing and anything you debugged, e.g. button placement on the breadboard, upload issues, etc. -->
 
 ## Future Ideas
 
