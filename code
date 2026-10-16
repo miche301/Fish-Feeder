@@ -5,8 +5,8 @@
 #include <time.h>
 
 
-const char* WIFI_SSID = "NETGEAR07";  // must be a 2.4 GHz network
-const char* WIFI_PASSWORD = "N33d4sp33d!*";
+const char* WIFI_SSID = "wifi";  // must be a 2.4 GHz network
+const char* WIFI_PASSWORD = "password";
 const unsigned long FEED_INTERVAL_HOURS = 24;  // LED starts blinking after this long
 // ----------------------------------
 
